@@ -4,6 +4,7 @@ import json
 import datetime
 import adal
 
+from .features import Features
 from .reports import Reports
 from .datasets import Datasets
 from .imports import Imports
@@ -58,6 +59,7 @@ class PowerBIClient:
         self.api_url = api_url
         self.token = token
         self.datasets = Datasets(self)
+        self.features = Features(self)
         self.reports = Reports(self)
         self.imports = Imports(self)
         self.groups = Groups(self)
