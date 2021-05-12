@@ -4,7 +4,6 @@ from unittest import TestCase
 import datetime
 
 from pypowerbi import utils
-from pypowerbi.utils import CredentialsBuilder
 
 
 class UtilsTests(TestCase):
