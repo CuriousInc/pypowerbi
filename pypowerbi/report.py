@@ -1,6 +1,6 @@
-# -*- coding: future_fstrings -*-
 
 import json
+from typing import Dict, Union
 
 
 class Report:
@@ -63,6 +63,59 @@ class Report:
 
     def __repr__(self):
         return f'<Report {str(self.__dict__)}>'
+
+
+class SourceReport:
+    source_report_id_key = 'sourceReportId'
+    source_workspace_id_key = 'sourceWorkspaceId'
+
+    def __init__(
+        self,
+        source_report_id: str,
+        source_workspace_id: str
+    ):
+        """Creates a SourceReport object
+
+        :param source_report_id: the source report id
+        :param source_workspace_id: the source workspace id
+        """
+        self.source_report_id = source_report_id
+        self.source_workspace_id = source_workspace_id
+
+    def as_dict(self) -> Dict[str, str]:
+        return {
+            self.source_report_id_key: self.source_report_id,
+            self.source_workspace_id_key: self.source_workspace_id
+        }
+
+    def __repr__(self) -> str:
+        return f'<SourceReport report_id={self.source_report_id} workspace_id={self.source_workspace_id}>'
+
+
+class UpdateReportContentRequest:
+    # The source type for the content update.
+    source_type = "ExistingReport"  # Use an existing report as a source for updating the content of a target report.
+    source_type_key = "sourceType"
+    source_report_key = "sourceReport"
+
+    def __init__(
+        self,
+        source_report: SourceReport
+    ):
+        """Creates an UpdateReportContentRequest
+
+        :param source_report: Source from existing report
+        """
+        self.source_report = source_report
+
+    def as_dict(self) -> Dict[str, Union[Dict[str, str], str]]:
+        return {
+            self.source_report_key: self.source_report.as_dict(),
+            self.source_type_key: self.source_type
+        }
+
+    def __repr__(self):
+        return f'<UpdateReportContentRequest sourceReport={self.source_report} sourceType={self.source_type}>'
 
 
 class ReportEncoder(json.JSONEncoder):

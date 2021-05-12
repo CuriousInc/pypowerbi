@@ -1,4 +1,3 @@
-# -*- coding: future_fstrings -*-
 import io
 from typing import Optional
 
@@ -7,7 +6,7 @@ import json
 from requests.exceptions import HTTPError
 
 import pypowerbi.client
-from pypowerbi.report import Report
+from pypowerbi.report import Report, UpdateReportContentRequest
 
 
 class Reports:
@@ -18,6 +17,7 @@ class Reports:
     clone_snippet = 'clone'
     export_snippet = 'Export'
     generate_token_snippet = 'generatetoken'
+    update_report_content_snippet = 'UpdateReportContent'
 
     # json keys
     get_reports_value_key = 'value'
@@ -132,7 +132,7 @@ class Reports:
         if response.status_code != 200:
             raise HTTPError(response, f'Clone report request returned http error: {response.json()}')
 
-        return Report.from_dict(json.loads(response.text))
+        return self.report_from_get_one_response(response)
 
     def delete_report(self, report_id, group_id=None):
         """
@@ -261,6 +261,47 @@ class Reports:
                 io.BytesIO(response.content).getbuffer()
             )
 
+    def update_report_content(
+        self,
+        update_report_content_request: UpdateReportContentRequest,
+        target_report_id: str,
+        target_group_id: Optional[str] = None
+    ) -> Report:
+        """Updates the specified report from the specified workspace to have the same content as
+        the specified report in the request body.
+
+        :param update_report_content_request: Power BI update report content request
+        :param target_report_id: The report id of which the content should be updated
+        :param target_group_id: The workspace id of the workspace in which the report to-be-updated resides
+        """
+
+        # group_id can be None. Account for it here
+        if target_group_id is None:
+            groups_part = '/'
+        else:
+            groups_part = f'/{self.groups_snippet}/{target_group_id}/'
+
+        # form the url
+        url = f'{self.base_url}{groups_part}{self.reports_snippet}/{target_report_id}/' \
+              f'{self.update_report_content_snippet}'
+
+        # form the headers
+        headers = self.client.auth_header
+
+        # form the body
+        body = update_report_content_request.as_dict()
+
+        # get the response
+        response = requests.post(url, headers=headers, json=body)
+
+        if response.status_code != 200:
+            in_group_part = "" if target_group_id is None else "in Group"
+            raise HTTPError(response, f'Update Report Content {in_group_part} request returned an http error: '
+                                      f'{response.json()}')
+
+        # parse and return response
+        return self.report_from_get_one_response(response)
+
     @classmethod
     def reports_from_get_reports_response(cls, response):
         """
@@ -276,3 +317,10 @@ class Reports:
             reports.append(Report.from_dict(entry))
 
         return reports
+
+    @classmethod
+    def report_from_get_one_response(cls, response: requests.Response) -> Report:
+        # parse
+        response_dict = json.loads(response.text)
+
+        return Report.from_dict(response_dict)
