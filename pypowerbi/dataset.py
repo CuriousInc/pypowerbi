@@ -197,7 +197,7 @@ class TableEncoder(json.JSONEncoder):
 
         if o.rows is not None:
             row_encoder = RowEncoder()
-            json_dict[Table.row_key] = [row_encoder.default(x) for x in o.rows]
+            json_dict[Table.rows_key] = [row_encoder.default(x) for x in o.rows]
 
         return json_dict
 
