@@ -14,11 +14,22 @@ class Dataset:
     is_effective_identity_required_key = 'isEffectiveIdentityRequired'
     is_effective_identity_roles_required_key = 'isEffectiveIdentityRolesRequired'
     is_on_prem_gateway_required_key = 'isOnPremGatewayRequired'
+    schema_may_not_be_up_to_date_key = 'schemaMayNotBeUpToDate'
     tables_key = 'tables'
 
-    def __init__(self, name, dataset_id=None, tables=None, add_rows_api_enabled=None,
-                 configured_by=None, is_refreshable=None, is_effective_identity_required=None,
-                 is_effective_identity_roles_required=None, is_on_prem_gateway_required=None):
+    def __init__(
+        self,
+        name,
+        dataset_id=None,
+        tables=None,
+        add_rows_api_enabled=None,
+        configured_by=None,
+        is_refreshable=None,
+        is_effective_identity_required=None,
+        is_effective_identity_roles_required=None,
+        is_on_prem_gateway_required=None,
+        schema_may_not_be_up_to_date=None
+    ):
         self.name = name
         self.id = dataset_id
         self.tables = tables
@@ -28,6 +39,7 @@ class Dataset:
         self.is_effective_identity_required = is_effective_identity_required
         self.is_effective_identity_roles_required = is_effective_identity_roles_required
         self.is_on_prem_gateway_required = is_on_prem_gateway_required
+        self.schema_may_not_be_up_to_date = schema_may_not_be_up_to_date
 
     @classmethod
     def from_dict(cls, dictionary):
@@ -89,11 +101,23 @@ class Dataset:
         else:
             is_on_prem_gateway_required = None
 
-        return Dataset(dataset_name, dataset_id, add_rows_api_enabled=add_rows_api_enabled,
-                       configured_by=configured_by, is_refreshable=is_refreshable,
-                       is_effective_identity_required=is_effective_identity_required,
-                       is_effective_identity_roles_required=is_effective_identity_roles_required,
-                       is_on_prem_gateway_required=is_on_prem_gateway_required)
+        # schema may not be up to date is optional
+        if Dataset.schema_may_not_be_up_to_date_key in dictionary:
+            schema_may_not_be_up_to_date = bool(dictionary[Dataset.schema_may_not_be_up_to_date_key])
+        else:
+            schema_may_not_be_up_to_date = None
+
+        return Dataset(
+            dataset_name,
+            dataset_id,
+            add_rows_api_enabled=add_rows_api_enabled,
+            configured_by=configured_by,
+            is_refreshable=is_refreshable,
+            is_effective_identity_required=is_effective_identity_required,
+            is_effective_identity_roles_required=is_effective_identity_roles_required,
+            is_on_prem_gateway_required=is_on_prem_gateway_required,
+            schema_may_not_be_up_to_date=schema_may_not_be_up_to_date
+        )
 
     def __repr__(self):
         return f'<Dataset {str(self.__dict__)}>'
